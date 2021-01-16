@@ -119,7 +119,6 @@ install(){
             esac
             ;;
     esac
-
 }
 
 installPrefix="${this}/frp"

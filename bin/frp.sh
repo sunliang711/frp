@@ -96,10 +96,27 @@ restart(){
     start
 }
 
-installPrefix="${this}/frp"
+installPrefix="${this}/../frp"
 
 config(){
     $ed "${installPrefix}/frpc.ini"
+}
+
+startS(){
+    _runAsRoot "systemctl start frps"
+}
+
+stopS(){
+    _runAsRoot "systemctl stop frps"
+}
+
+restartS(){
+    stops
+    starts
+}
+
+configS(){
+    $ed "${installPrefix}/frps.ini"
 }
 
 em(){
@@ -110,6 +127,7 @@ em(){
 # write your code above
 ###############################################################################
 function _help(){
+    cd ${this}
     cat<<EOF2
 Usage: $(basename $0) ${bold}CMD${reset}
 
