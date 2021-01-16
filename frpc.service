@@ -1,0 +1,10 @@
+[Unit]
+Description=frpc service
+
+[Service]
+Type=simple
+ExecStart=FRPC -c CONFIG
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

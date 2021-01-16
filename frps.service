@@ -1,0 +1,10 @@
+[Unit]
+Description="frps service"
+
+[Service]
+Type=simple
+ExecStart=FRPS -c CONFIG
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
