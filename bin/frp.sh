@@ -111,8 +111,8 @@ stopS(){
 }
 
 restartS(){
-    stops
-    starts
+    stopS
+    startS
 }
 
 configS(){

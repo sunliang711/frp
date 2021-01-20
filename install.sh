@@ -131,6 +131,7 @@ _download(){
 
     cd "$destDir"
     echo "Download frp ..."
+    echo "link: $link"
     curl -LO "$link" || { echo "Download failed!"; exit 1; }
 
     echo "Extract frp ..."
@@ -163,6 +164,7 @@ _install_on_macos(){
 }
 
 installServer(){
+    link="${linuxAMD64Link}"
     _download
     cd "${this}"
     sed -e "s|FRPS|${installPrefix}/frps|g" \
