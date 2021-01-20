@@ -83,11 +83,25 @@ fi
 # TODO
 
 start(){
-    _runAsRoot "systemctl start frpc"
+    case $(uname) in
+        Linux)
+            _runAsRoot "systemctl start frpc"
+            ;;
+        Darwin)
+            launchctl load -w ~/Library/LaunchAgents/frpc.plist
+            ;;
+    esac
 }
 
 stop(){
-    _runAsRoot "systemctl stop frpc"
+    case $(uname) in
+        Linux)
+            _runAsRoot "systemctl stop frpc"
+            ;;
+        Darwin)
+            launchctl unload -w ~/Library/LaunchAgents/frpc.plist
+            ;;
+    esac
 
 }
 
