@@ -164,7 +164,26 @@ _install_on_macos(){
 }
 
 installServer(){
-    link="${linuxAMD64Link}"
+    case $(uname) in
+        Linux)
+            case $(uname -m) in
+                x86_64)
+                    link="$linuxAMD64Link"
+                    ;;
+                aarch64)
+                    link="$linuxARM64Link"
+                    ;;
+                *)
+                    echo "Unknown Linux machine version"
+                    exit 1
+                    ;;
+            esac
+            ;;
+        *)
+            echo "not linux"
+            exit 1
+            ;;
+    esac
     _download
     cd "${this}"
     sed -e "s|FRPS|${installPrefix}/frps|g" \
