@@ -115,6 +115,7 @@ start(){
     case $(uname) in
         Linux)
         _create_linux_service_file ${name} ${binaryDest}/frpc ${runtimeClient}/${name}.ini
+        _runAsRoot systemctl deamon-reload
         _runAsRoot systemctl start ${name}.service
         ;;
         Darwin)
@@ -136,7 +137,7 @@ _create_linux_service_file(){
 
     tmpFrpcServiceFile=/tmp/frpc-tmp.service
     cat<<EOF >${tmpFrpcServiceFile}
-[unit]
+[Unit]
 Description=frpc service ${name}
 
 [Service]
