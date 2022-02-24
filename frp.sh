@@ -115,7 +115,7 @@ start(){
     case $(uname) in
         Linux)
         _create_linux_service_file ${name} ${binaryDest}/frpc ${runtimeClient}/${name}.ini
-        _runAsRoot systemctl deamon-reload
+        _runAsRoot systemctl daemon-reload
         _runAsRoot systemctl start ${name}.service
         ;;
         Darwin)
@@ -206,14 +206,8 @@ stop(){
 
 restart(){
     nm=${1:?'missing name'}
-    name=$(_nameFor ${nm})
-    realFrpcIniFile=${runtimeClient}/${name}.ini
-    if [ ! -e ${realFrpcIniFile} ];then
-        echo "no such config for ${nm}"
-        exit 1
-    fi
-    stop ${name}
-    start ${name}
+    stop ${nm}
+    start ${nm}
 }
 
 status(){
