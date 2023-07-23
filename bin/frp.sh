@@ -106,8 +106,20 @@ stop(){
 }
 
 restart(){
-    stop
-    start
+    case $(uname) in
+        Linux)
+            _runAsRoot "systemctl restart frpc"
+            ;;
+        Darwin)
+            echo "Do not restart in remote ssh server,continue ? [y/N] "
+            read cont
+            if [ "${cont}" = "y" ];then
+                echo "restart"
+                launchctl unload -w ~/Library/LaunchAgents/frpc.plist
+                launchctl load -w ~/Library/LaunchAgents/frpc.plist
+            fi
+            ;;
+    esac
 }
 
 installPrefix="${this}/../frp"

@@ -82,9 +82,13 @@ fi
 ###############################################################################
 # TODO
 
-darwinAMD64Link=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_darwin_amd64.tar.gz
-linuxAMD64Link=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_linux_amd64.tar.gz
-linuxARM64Link=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_linux_arm64.tar.gz
+# darwinAMD64Link=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_darwin_amd64.tar.gz
+# linuxAMD64Link=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_linux_amd64.tar.gz
+# linuxARM64Link=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_linux_arm64.tar.gz
+
+darwinAMD64Link=https://github.com/fatedier/frp/releases/download/v0.51.1/frp_0.51.1_darwin_amd64.tar.gz
+linuxAMD64Link=https://github.com/fatedier/frp/releases/download/v0.51.1/frp_0.51.1_linux_amd64.tar.gz
+linuxARM64Link=https://github.com/fatedier/frp/releases/download/v0.51.1/frp_0.51.1_linux_arm64.tar.gz
 
 link=
 
@@ -164,7 +168,26 @@ _install_on_macos(){
 }
 
 installServer(){
-    link="${linuxAMD64Link}"
+    case $(uname) in
+        Linux)
+            case $(uname -m) in
+                x86_64)
+                    link="$linuxAMD64Link"
+                    ;;
+                aarch64)
+                    link="$linuxARM64Link"
+                    ;;
+                *)
+                    echo "Unknown Linux machine version"
+                    exit 1
+                    ;;
+            esac
+            ;;
+        *)
+            echo "not linux"
+            exit 1
+            ;;
+    esac
     _download
     cd "${this}"
     sed -e "s|FRPS|${installPrefix}/frps|g" \
