@@ -128,6 +128,11 @@ config(){
     $ed "${installPrefix}/frpc.ini"
 }
 
+log(){
+    local cfg="${installPrefix}/frpc.ini"
+    _log "$cfg"
+}
+
 startS(){
     _runAsRoot "systemctl start frps"
 }
@@ -139,6 +144,22 @@ stopS(){
 restartS(){
     stopS
     startS
+}
+
+_log(){
+    local cfg="${1}"
+    local logfile="$(perl -lne 'print $1 if/^\s*log_file\s*=\s*(\S+)$/' ${cfg})"
+    echo "logfile: $logfile"
+    if [ -n "$logfile" ];then
+        _runAsRoot "tail -f $logfile"
+    else
+        echo "Not config logfile"
+    fi
+}
+
+logS(){
+    local cfg="${installPrefix}/frps.ini"
+    _log "$cfg"
 }
 
 configS(){
