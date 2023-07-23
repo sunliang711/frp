@@ -33,9 +33,13 @@ fi
 # write your code below (just define function[s])
 # function is hidden when begin with '_'
 # link format $(uname)$(uname -m)
-Darwinx86_64=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_darwin_amd64.tar.gz
-Linuxx86_64=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_linux_amd64.tar.gz
-Linuxaarch64=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_linux_arm64.tar.gz
+# Darwinx86_64=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_darwin_amd64.tar.gz
+# Linuxx86_64=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_linux_amd64.tar.gz
+# Linuxaarch64=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_linux_arm64.tar.gz
+
+Darwinx86_64=https://github.com/fatedier/frp/releases/download/v0.51.1/frp_0.51.1_darwin_amd64.tar.gz
+Linuxx86_64=https://github.com/fatedier/frp/releases/download/v0.51.1/frp_0.51.1_linux_amd64.tar.gz
+Linuxaarch64=https://github.com/fatedier/frp/releases/download/v0.51.1/frp_0.51.1_linux_arm64.tar.gz
 
 link="$(uname)$(uname -m)"
 link=${!link}
