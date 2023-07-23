@@ -90,6 +90,8 @@ darwinAMD64Link=https://github.com/fatedier/frp/releases/download/v0.51.1/frp_0.
 linuxAMD64Link=https://github.com/fatedier/frp/releases/download/v0.51.1/frp_0.51.1_linux_amd64.tar.gz
 linuxARM64Link=https://github.com/fatedier/frp/releases/download/v0.51.1/frp_0.51.1_linux_arm64.tar.gz
 
+echo "use new-install.sh!!"
+exit 1
 link=
 
 install(){

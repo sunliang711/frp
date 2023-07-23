@@ -138,7 +138,7 @@ _create_linux_service_file(){
     tmpFrpcServiceFile=/tmp/frpc-tmp.service
     cat<<EOF >${tmpFrpcServiceFile}
 [Unit]
-Description=frpc service ${name}
+Description=frp service ${name}
 
 [Service]
 Type=simple
@@ -162,7 +162,7 @@ _create_macos_service_file(){
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>frpc ${name}</string>
+    <string>frp ${name}</string>
     <key>WorkingDirectory</key>
     <string>TODO</string>
     <key>ProgramArguments</key>
@@ -271,21 +271,146 @@ rm(){
 
 }
 # server actions
-newserver(){
-    echo todo
+configserver(){
+    frpsIniFile=${runtimeServer}/frps.ini
+    if [ ! -e ${frpsIniFile} ];then
+        _create_frps_config
+    fi
+    before=$(md5sum ${frpsIniFile})
+    $ed ${frpsIniFile}
+    after=$(md5sum ${frpsIniFile})
+
+    if [[ "$before" != "after" ]];then
+        restartserver
+    fi
 }
 
-startServer(){
-    echo todo
+_create_frps_config(){
+        cat<<-EOF>/tmp/frps.ini
+[common]
+bind_addr = 0.0.0.0
+bind_port = 7000
+
+dashboard_addr = 0.0.0.0
+dashboard_port = 7500
+dashboard_user = admin
+dashboard_pwd = admin
+dashboard_tls_mode = false
+# dashboard_tls_cert_file = server.crt
+# dashboard_tls_key_file = server.key
+
+# enable_prometheus will export prometheus metrics on {dashboard_addr}:{dashboard_port} in /metrics api.
+enable_prometheus = false
+
+
+# console or real logFile path like ./frps.log
+log_file = ./frps.log
+
+# trace, debug, info, warn, error
+log_level = info
+log_max_days = 3
+# disable log colors when log_file is console, default is false
+disable_log_color = false
+# DetailedErrorsToClient defines whether to send the specific error (with debug info) to frpc. By default, this value is true.
+detailed_errors_to_client = true
+
+# authentication_method specifies what authentication method to use authenticate frpc with frps.
+# If "token" is specified - token will be read into login message.
+# If "oidc" is specified - OIDC (Open ID Connect) token will be issued using OIDC settings. By default, this value is "token".
+authentication_method = token
+
+# authenticate_heartbeats specifies whether to include authentication token in heartbeats sent to frps. By default, this value is false.
+authenticate_heartbeats = false
+
+# AuthenticateNewWorkConns specifies whether to include authentication token in new work connections sent to frps. By default, this value is false.
+authenticate_new_work_conns = false
+
+# auth token
+token = 12345678
+
+# oidc_issuer specifies the issuer to verify OIDC tokens with.
+# By default, this value is "".
+oidc_issuer =
+
+# oidc_audience specifies the audience OIDC tokens should contain when validated.
+# By default, this value is "".
+oidc_audience =
+
+# oidc_skip_expiry_check specifies whether to skip checking if the OIDC token is expired.
+# By default, this value is false.
+oidc_skip_expiry_check = false
+
+# oidc_skip_issuer_check specifies whether to skip checking if the OIDC token's issuer claim matches the issuer specified in OidcIssuer.
+# By default, this value is false.
+oidc_skip_issuer_check = false
+
+# heartbeat configure, it's not recommended to modify the default value
+# the default value of heartbeat_timeout is 90. Set negative value to disable it.
+# heartbeat_timeout = 90
+
+# user_conn_timeout configure, it's not recommended to modify the default value
+# the default value of user_conn_timeout is 10
+# user_conn_timeout = 10
+
+# only allow frpc to bind ports you list, if you set nothing, there won't be any limit
+allow_ports = 2000-3000,3001,3003,4000-50000
+
+# pool_count in each proxy will change to max_pool_count if they exceed the maximum value
+max_pool_count = 5
+
+# max ports can be used for each client, default value is 0 means no limit
+max_ports_per_client = 0
+
+# tls_only specifies whether to only accept TLS-encrypted connections. By default, the value is false.
+tls_only = false
+
+# tls_cert_file = server.crt
+# tls_key_file = server.key
+# tls_trusted_ca_file = ca.crt
+
+# if tcp stream multiplexing is used, default is true
+# tcp_mux = true
+
+EOF
+    _runAsRoot mv /tmp/frps.ini ${frpsIniFile}
+
+}
+
+startserver(){
+    frpsIniFile=${runtimeServer}/frps.ini
+    if [ ! -e ${frpsIniFile} ];then
+        _create_frps_config
+    fi
+
+    # create service file
+    case $(uname) in
+        Linux)
+        _create_linux_service_file frps ${binaryDest}/frps ${frpsIniFile}
+        _runAsRoot systemctl daemon-reload
+        _runAsRoot systemctl enable --now frps.service
+        ;;
+        Darwin)
+        _create_macos_service_file frps ${binaryDest}/frps ${frpsIniFile}
+        # start
+        launchctl load -w $(_agentFor frps)
+        ;;
+        *)
+        echo "os error"
+        exit 1
+    esac
 }
 
 stopserver(){
-    echo todo
+    _runAsRoot systemctl stop frps.service
 }
 
 
-restartServer(){
-    echo
+restartserver(){
+    _runAsRoot systemctl restart frps.service
+}
+
+logserver(){
+    _runAsRoot journalctl -u frps -f
 }
 
 
