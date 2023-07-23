@@ -82,9 +82,13 @@ fi
 ###############################################################################
 # TODO
 
-darwinAMD64Link=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_darwin_amd64.tar.gz
-linuxAMD64Link=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_linux_amd64.tar.gz
-linuxARM64Link=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_linux_arm64.tar.gz
+# darwinAMD64Link=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_darwin_amd64.tar.gz
+# linuxAMD64Link=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_linux_amd64.tar.gz
+# linuxARM64Link=https://source711.oss-cn-shanghai.aliyuncs.com/frp/0.34.3/frp_0.34.3_linux_arm64.tar.gz
+
+darwinAMD64Link=https://github.com/fatedier/frp/releases/download/v0.51.1/frp_0.51.1_darwin_amd64.tar.gz
+linuxAMD64Link=https://github.com/fatedier/frp/releases/download/v0.51.1/frp_0.51.1_linux_amd64.tar.gz
+linuxARM64Link=https://github.com/fatedier/frp/releases/download/v0.51.1/frp_0.51.1_linux_arm64.tar.gz
 
 link=
 
