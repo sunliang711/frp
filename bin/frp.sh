@@ -297,7 +297,7 @@ configserver(){
     $ed ${frpsIniFile}
     after=$(md5sum ${frpsIniFile})
 
-    if [[ "$before" != "after" ]];then
+    if [[ "$before" != "$after" ]];then
         echo "config file changed, restart .."
         restartserver
     fi
