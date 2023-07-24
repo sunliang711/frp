@@ -85,7 +85,7 @@ _download(){
 
 _installScript(){
     _require_root
-    ln -sf ${this}/frp.sh ${binaryDest}
+    ln -sf ${this}/bin/frp.sh ${binaryDest}
 }
 
 # write your code above
