@@ -96,8 +96,10 @@ config(){
     after="$(md5sum ${configFile})"
 
     if _isRunning ${nm};then
-        echo "config file changed,and service is running,restart it.."
-        restart ${nm}
+	    if [[ "${before}" != "${after}" ]] ;then
+		echo "config file changed,and service is running,restart it.."
+		restart ${nm}
+	    fi
     fi
 }
 
