@@ -82,6 +82,7 @@ def resolve_project_dir(script_path: Path | None = None) -> Path:
 
 PROJECT_DIR = resolve_project_dir()
 ETC_DIR = PROJECT_DIR / "etc"
+DEFAULT_CONFIG_DIR = ETC_DIR / "defaults"
 SYSTEMD_DIR = Path("/etc/systemd/system")
 BIN_DIR = Path("/usr/local/bin")
 VALID_INSTANCE_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
@@ -105,6 +106,10 @@ class ServiceSpec:
 
     def config_path(self, instance: str) -> Path:
         return self.config_dir / f"{instance}.toml"
+
+    @property
+    def default_template_path(self) -> Path:
+        return DEFAULT_CONFIG_DIR / f"{self.name}.toml"
 
     def unit_name(self, instance: str) -> str:
         return f"{self.name}@{instance}.service"
@@ -147,6 +152,7 @@ def ensure_instance_name(name: str) -> str:
 
 
 def ensure_project_layout() -> None:
+    DEFAULT_CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     for spec in SERVICE_SPECS.values():
         spec.config_dir.mkdir(parents=True, exist_ok=True)
 
@@ -247,6 +253,13 @@ WantedBy=multi-user.target
 """
 
 
+def find_downloaded_file(root: Path, filename: str) -> Path:
+    for path in root.rglob(filename):
+        if path.is_file():
+            return path
+    raise FrpError(f"没有在下载结果中找到 {filename}")
+
+
 def find_downloaded_binary(root: Path, binary_name: str) -> Path:
     for path in root.rglob(binary_name):
         if path.is_file() and os.access(path, os.X_OK):
@@ -273,6 +286,13 @@ def require_config(spec: ServiceSpec, instance: str) -> Path:
     return config_path
 
 
+def get_default_config(spec: ServiceSpec) -> tuple[str, Path | None]:
+    template_path = spec.default_template_path
+    if template_path.exists():
+        return template_path.read_text(encoding="utf-8"), template_path
+    return spec.default_config, None
+
+
 def cmd_add(args: argparse.Namespace) -> int:
     spec = get_spec(args.service)
     require_installed_template(spec)
@@ -281,8 +301,13 @@ def cmd_add(args: argparse.Namespace) -> int:
     if config_path.exists():
         raise FrpError(f"配置已存在: {config_path}")
 
-    config_path.write_text(spec.default_config, encoding="utf-8")
+    default_config, template_path = get_default_config(spec)
+    config_path.write_text(default_config, encoding="utf-8")
     LOGGER.info("创建配置: %s", config_path)
+    if template_path is not None:
+        LOGGER.info("使用默认模板: %s", template_path)
+    else:
+        LOGGER.info("默认模板缺失，回退到内置模板: %s", spec.name)
     LOGGER.info("打开编辑器: %s", config_path)
     edit_file(config_path)
     LOGGER.info("启用实例开机自启: %s", spec.unit_name(args.name))
