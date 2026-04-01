@@ -234,7 +234,7 @@ def edit_file(path: Path) -> None:
 
 
 def render_unit(spec: ServiceSpec) -> str:
-    working_dir = systemd_quote(str(spec.config_dir))
+    working_dir = str(spec.config_dir)
     config_path = systemd_quote(str(spec.config_dir / "%i.toml"))
     return f"""[Unit]
 Description={spec.name} instance %i
