@@ -112,12 +112,12 @@ python3 install.py uninstall
 - `etc/frpc/<name>.toml`
 - `etc/frps/<name>.toml`
 
-`add` 创建配置时会优先使用安装阶段从 frp 压缩包中保存下来的官方模板：
+`add` 创建配置时会优先使用仓库 `template` 目录下的模板文件：
 
-- `etc/defaults/frpc.toml`
-- `etc/defaults/frps.toml`
+- `template/frpc_full_example.toml`
+- `template/frps_full_example.toml`
 
-如果默认模板不存在，则回退到脚本内置模板。
+如果仓库模板不存在，则回退到脚本内置模板。
 
 ## 用法
 

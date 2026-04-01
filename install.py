@@ -42,11 +42,6 @@ def install_project_hint() -> None:
     frp.install_text(hint_path, f"{PROJECT_DIR}\n", "644")
 
 
-def install_default_template(spec: frp.ServiceSpec, src: Path) -> None:
-    spec.default_template_path.parent.mkdir(parents=True, exist_ok=True)
-    spec.default_template_path.write_bytes(src.read_bytes())
-
-
 def iter_known_units() -> list[str]:
     units: list[str] = []
     for spec in frp.SERVICE_SPECS.values():
@@ -89,17 +84,10 @@ def cmd_install(args: argparse.Namespace) -> int:
         temp_root = Path(tmp_dir)
         frpc_src = frp.find_downloaded_binary(temp_root, "frpc")
         frps_src = frp.find_downloaded_binary(temp_root, "frps")
-        frpc_template_src = frp.find_downloaded_file(temp_root, "frpc.toml")
-        frps_template_src = frp.find_downloaded_file(temp_root, "frps.toml")
-
         frp.LOGGER.info("安装 frpc -> %s", frp.BIN_DIR / "frpc")
         frp.install_file(frpc_src, frp.BIN_DIR / "frpc", "755")
         frp.LOGGER.info("安装 frps -> %s", frp.BIN_DIR / "frps")
         frp.install_file(frps_src, frp.BIN_DIR / "frps", "755")
-        frp.LOGGER.info("保存 frpc 默认模板 -> %s", frp.SERVICE_SPECS["frpc"].default_template_path)
-        install_default_template(frp.SERVICE_SPECS["frpc"], frpc_template_src)
-        frp.LOGGER.info("保存 frps 默认模板 -> %s", frp.SERVICE_SPECS["frps"].default_template_path)
-        install_default_template(frp.SERVICE_SPECS["frps"], frps_template_src)
 
     frp.LOGGER.info("安装管理脚本 -> %s", INSTALLED_MANAGER)
     frp.install_file(MANAGER_SCRIPT, INSTALLED_MANAGER, "755")
