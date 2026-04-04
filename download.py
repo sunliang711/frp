@@ -67,6 +67,10 @@ class SlowDownloadError(Exception):
     """下载速度低于阈值"""
 
 
+class ExtractError(Exception):
+    """下载包解压失败"""
+
+
 def _alarm_handler(signum, frame):
     raise TimeoutError(f"服务器无响应，{TIMEOUT}s 超时中断")
 
@@ -141,6 +145,16 @@ def _validate_tar_member(base_dir, member):
         raise ValueError(f"tar 成员包含设备文件: {member.name}")
 
 
+def cleanup_path(path):
+    """删除文件或目录，用于清理解压失败残留"""
+    if not os.path.exists(path):
+        return
+    if os.path.isdir(path):
+        shutil.rmtree(path)
+        return
+    os.remove(path)
+
+
 def download(url, dest, min_speed=0):
     """下载文件到 dest，带进度条显示。
 
@@ -200,31 +214,46 @@ def extract_download(archive_path, output_dir):
     if lower_name.endswith(".tar.gz") or lower_name.endswith(".tgz"):
         extracted_dir = os.path.join(output_dir, strip_archive_suffix(filename))
         os.makedirs(extracted_dir, exist_ok=True)
-        with tarfile.open(archive_path, "r:gz") as tar:
-            members = tar.getmembers()
-            for member in members:
-                _validate_tar_member(extracted_dir, member)
-            for member in members:
-                tar.extract(member, extracted_dir)
-        os.remove(archive_path)
+        try:
+            with tarfile.open(archive_path, "r:gz") as tar:
+                members = tar.getmembers()
+                for member in members:
+                    _validate_tar_member(extracted_dir, member)
+                for member in members:
+                    tar.extract(member, extracted_dir)
+        except (OSError, tarfile.TarError, ValueError) as e:
+            cleanup_path(extracted_dir)
+            cleanup_path(archive_path)
+            raise ExtractError(f"无法解压 {filename}: {e}") from e
+        cleanup_path(archive_path)
         return extracted_dir
 
     if lower_name.endswith(".zip"):
         extracted_dir = os.path.join(output_dir, strip_archive_suffix(filename))
         os.makedirs(extracted_dir, exist_ok=True)
-        with zipfile.ZipFile(archive_path, "r") as zf:
-            for member in zf.namelist():
-                _ensure_safe_extract_path(extracted_dir, member)
-            zf.extractall(extracted_dir)
-        os.remove(archive_path)
+        try:
+            with zipfile.ZipFile(archive_path, "r") as zf:
+                for member in zf.namelist():
+                    _ensure_safe_extract_path(extracted_dir, member)
+                zf.extractall(extracted_dir)
+        except (OSError, ValueError, zipfile.BadZipFile, zipfile.LargeZipFile) as e:
+            cleanup_path(extracted_dir)
+            cleanup_path(archive_path)
+            raise ExtractError(f"无法解压 {filename}: {e}") from e
+        cleanup_path(archive_path)
         return extracted_dir
 
     if lower_name.endswith(".gz"):
         extracted = os.path.join(output_dir, strip_archive_suffix(filename))
-        with gzip.open(archive_path, "rb") as fi, open(extracted, "wb") as fo:
-            shutil.copyfileobj(fi, fo)
-        os.remove(archive_path)
-        os.chmod(extracted, 0o755)
+        try:
+            with gzip.open(archive_path, "rb") as fi, open(extracted, "wb") as fo:
+                shutil.copyfileobj(fi, fo)
+            os.chmod(extracted, 0o755)
+        except (OSError, EOFError, gzip.BadGzipFile) as e:
+            cleanup_path(extracted)
+            cleanup_path(archive_path)
+            raise ExtractError(f"无法解压 {filename}: {e}") from e
+        cleanup_path(archive_path)
         return extracted
 
     return archive_path
@@ -514,7 +543,11 @@ def try_sources(sources, output_dir, should_extract):
             return os.path.abspath(dest)
 
         print("  正在解压下载内容...")
-        extracted = extract_download(dest, output_dir)
+        try:
+            extracted = extract_download(dest, output_dir)
+        except ExtractError as e:
+            print(f"  ✗ 解压失败: {e}")
+            continue
         print("  ✓ 解压完成")
         return os.path.abspath(extracted)
 

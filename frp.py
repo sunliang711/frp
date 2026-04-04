@@ -408,10 +408,12 @@ def cmd_remove(args: argparse.Namespace) -> int:
 
 def cmd_list(args: argparse.Namespace) -> int:
     spec = get_spec(args.service)
-    ensure_project_layout()
     LOGGER.info("列出配置目录: %s", spec.config_dir)
 
-    configs = sorted(spec.config_dir.glob("*.toml"))
+    if spec.config_dir.exists():
+        configs = sorted(spec.config_dir.glob("*.toml"))
+    else:
+        configs = []
     for config in configs:
         print(config.stem)
     return 0
