@@ -1,3 +1,29 @@
+serverAddr = "0.0.0.0"
+serverPort = 7000
+auth.method = "token"
+auth.token = "12345678"
+
+# console or real logFile path like ./frpc.log
+log.to = "./frpc.log"
+# trace, debug, info, warn, error
+log.level = "info"
+log.maxDays = 3
+
+# Set admin address for control frpc's action by http api such as reload
+webServer.addr = "127.0.0.1"
+webServer.port = 7400
+webServer.user = "admin"
+webServer.password = "admin"
+
+[[proxies]]
+name = "ssh_random"
+type = "tcp"
+localIP = "192.168.31.100"
+localPort = 22
+# If remotePort is 0, frps will assign a random port for you
+remotePort = 0
+
+
 ## # This configuration file is for reference only. Please do not use this configuration directly to run the program as it may have various issues.
 ## 
 ## # Optional unique identifier for this frpc instance.
